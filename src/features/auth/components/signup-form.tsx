@@ -9,10 +9,13 @@ import { FormField } from "@/components/ui/form-field";
 import { firstFieldErrors } from "@/lib/utils";
 import { useSignup } from "@/features/auth/mutations";
 import { signupSchema, type SignupInput } from "@/features/auth/schemas";
+import type { SelfServeRole } from "@/features/auth/api";
+import { roleAuthPaths } from "@/features/auth/role-paths";
 
-export function SignupForm() {
+export function SignupForm({ role }: { role: SelfServeRole }) {
   const router = useRouter();
-  const signup = useSignup();
+  const signup = useSignup(role);
+  const paths = roleAuthPaths(role);
   const [values, setValues] = useState({
     name: "",
     email: "",
@@ -29,7 +32,7 @@ export function SignupForm() {
       return;
     }
     setErrors({});
-    signup.mutate(result.data, { onSuccess: () => router.push("/agency") });
+    signup.mutate(result.data, { onSuccess: () => router.push(paths.dashboard) });
   }
 
   return (
@@ -81,7 +84,7 @@ export function SignupForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-primary hover:text-primary/80">
+        <Link href={paths.login} className="font-medium text-primary hover:text-primary/80">
           Log in
         </Link>
       </p>

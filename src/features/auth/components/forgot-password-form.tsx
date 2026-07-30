@@ -9,9 +9,12 @@ import { FormField } from "@/components/ui/form-field";
 import { firstFieldErrors } from "@/lib/utils";
 import { useForgotPassword } from "@/features/auth/mutations";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/features/auth/schemas";
+import type { SelfServeRole } from "@/features/auth/api";
+import { roleAuthPaths } from "@/features/auth/role-paths";
 
-export function ForgotPasswordForm() {
-  const forgotPassword = useForgotPassword();
+export function ForgotPasswordForm({ role }: { role: SelfServeRole }) {
+  const forgotPassword = useForgotPassword(role);
+  const paths = roleAuthPaths(role);
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Partial<Record<keyof ForgotPasswordInput, string>>>({});
   const [sent, setSent] = useState(false);
@@ -37,7 +40,7 @@ export function ForgotPasswordForm() {
           If an account exists for <span className="font-medium text-foreground">{email}</span>,
           we&apos;ve sent a link to reset your password.
         </p>
-        <Link href="/login" className="text-sm font-medium text-primary hover:text-primary/80">
+        <Link href={paths.login} className="text-sm font-medium text-primary hover:text-primary/80">
           Back to log in
         </Link>
       </div>
