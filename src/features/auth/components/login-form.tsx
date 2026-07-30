@@ -11,10 +11,13 @@ import { FormField } from "@/components/ui/form-field";
 import { firstFieldErrors } from "@/lib/utils";
 import { useLogin } from "@/features/auth/mutations";
 import { loginSchema, type LoginInput } from "@/features/auth/schemas";
+import type { AuthRole } from "@/features/auth/api";
+import { roleAuthPaths } from "@/features/auth/role-paths";
 
-export function LoginForm() {
+export function LoginForm({ role }: { role: AuthRole }) {
   const router = useRouter();
-  const login = useLogin();
+  const login = useLogin(role);
+  const paths = roleAuthPaths(role);
   const [values, setValues] = useState({ email: "", password: "", remember: false });
   const [errors, setErrors] = useState<Partial<Record<keyof LoginInput, string>>>({});
 
@@ -26,7 +29,7 @@ export function LoginForm() {
       return;
     }
     setErrors({});
-    login.mutate(result.data, { onSuccess: () => router.push("/agency") });
+    login.mutate(result.data, { onSuccess: () => router.push(paths.dashboard) });
   }
 
   return (
@@ -64,24 +67,28 @@ export function LoginForm() {
             Remember me
           </Label>
         </div>
-        <Link
-          href="/forgot-password"
-          className="text-sm font-medium text-primary hover:text-primary/80"
-        >
-          Forgot password?
-        </Link>
+        {paths.forgotPassword && (
+          <Link
+            href={paths.forgotPassword}
+            className="text-sm font-medium text-primary hover:text-primary/80"
+          >
+            Forgot password?
+          </Link>
+        )}
       </div>
 
       <Button type="submit" size="lg" className="w-full" disabled={login.isPending}>
         {login.isPending ? "Logging in…" : "Log in"}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-medium text-primary hover:text-primary/80">
-          Sign up
-        </Link>
-      </p>
+      {paths.signup && (
+        <p className="text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link href={paths.signup} className="font-medium text-primary hover:text-primary/80">
+            Sign up
+          </Link>
+        </p>
+      )}
     </form>
   );
 }
