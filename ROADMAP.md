@@ -24,10 +24,10 @@ Tasks are grouped into phases in rough dependency order. Within each phase, `**M
 
 Everything here is net-new backend work; only auth exists today.
 
-- [ ] **MVP** `Property` model + endpoints — agencies create/list/view listings, admin approve/reject, public browse (mirrors the shape already designed in the frontend's `features/agency` and `features/admin` mock data — reuse those field names as the contract).
-- [ ] **MVP** `Investment`/`Share` model — the core transaction: an investor buying shares in a property. Needs to track ownership, compute raised-amount and percent-funded, and enforce the funding cap (can't oversell shares past 100%).
-- [ ] **MVP** Refund logic — if a property doesn't reach its funding target within the window, all investors in that round need to be refunded (matches the copy already on the marketing site's Risk Disclosure and Regulation pages).
-- [ ] **MVP** `MarketplaceListing` + `PurchaseOffer` models — direct-sale houses with payment plans, matching the frontend's `features/marketplace` mock shape (already includes install­ment-plan config: down payment %, duration options).
+- [x] **MVP** `Property` model + endpoints — agencies create/list/view listings, admin approve/reject, public browse. *(Note: `features/admin` and `features/marketplace` didn't actually exist in the frontend checkout when this was built — only `features/agency`'s schema was real. Property was designed as a superset of that real contract, adding `PENDING_REVIEW`/`REJECTED`/`CLOSED_UNFUNDED` states the frontend doesn't have yet. Phase 3 needs to catch the frontend up.)*
+- [x] **MVP** `Investment`/`Share` model — the core transaction: an investor buying shares in a property. Tracks ownership, raised-amount, percent-funded; funding cap enforced via an atomic conditional `findOneAndUpdate` (no oversell possible, verified under a same-property double-buy race).
+- [x] **MVP** Refund logic — lazy expiry check (no cron) flips an unfunded property to `CLOSED_UNFUNDED` and cascades its investments to `REFUNDED` on next read/write. Status-transition only — no real money moves yet since no wallet/ledger exists until Phase 2.
+- [x] **MVP** `MarketplaceListing` + `PurchaseOffer` models — direct-sale houses with payment plans (full or installment, with down-payment % and duration options), buyer offers requiring Investor login, agency accept/reject with sibling-offer cascade.
 - [ ] Dividend/payout model — quarterly rental income distribution to shareholders, and the agency commission payout tied to it (the frontend's Earnings/Transactions pages already assume this data shape).
 - [ ] Secondary-market trade model — investors listing and buying shares from each other post-funding (the frontend's marketing copy promises this; no backend model exists yet).
 - [ ] Notification model + delivery — replace the frontend's mocked notifications with real backend-generated events (new investor, funding milestone, KYC flag, agency application, etc.) for all three roles.
@@ -38,11 +38,11 @@ Everything here is net-new backend work; only auth exists today.
 
 ## Phase 2 — Payments & money movement
 
-- [ ] **MVP** Naira payment collection — Paystack or Flutterwave integration for deposits and share purchases.
-- [ ] **MVP** Wallet/ledger system — investor balance, transaction history, and escrow of invested funds until a funding round closes (or gets refunded).
+- [x] **MVP** Naira payment collection — Paystack integration (deposits go through the gateway; share purchases draw from the resulting wallet balance rather than a second gateway call per investment — see wallet/ledger note below). Verified against the real Paystack sandbox, including a genuine completed test-card charge (not just a simulated webhook).
+- [x] **MVP** Wallet/ledger system — investor balance, transaction history, and escrow of invested funds until a funding round closes (or gets refunded). Wallet-first model: deposit → available balance → invest escrows into `escrowed` → refund reverses the escrow internally (no second Paystack call). Ledger rows double as an idempotency guard (unique-indexed per deposit/investment) so webhook retries and concurrent requests can't double-credit or double-escrow.
 - [ ] Diaspora payment rails — card payments (Stripe) and/or USDC, plus real currency conversion (the homepage's "currency converter" is currently a cosmetic-only widget with hardcoded rates — needs a real FX rate source).
-- [ ] Agency payout automation — bank transfer disbursement or, at minimum, admin tooling to mark payouts as sent and record them.
-- [ ] Reconciliation & audit trail — this is a regulated financial product; every money movement needs to be traceable.
+- [ ] Agency payout automation — bank transfer disbursement or, at minimum, admin tooling to mark payouts as sent and record them. *(Not started: escrowed funds for `FUNDED` properties currently sit in escrow indefinitely — this is the next piece needed to actually pay agencies out.)*
+- [x] Reconciliation & audit trail — largely satisfied as a byproduct of the ledger design (every balance change is a traceable `WalletTransaction` row with before/after balances and a link back to its Deposit or Investment); no dedicated reconciliation tooling/dashboard was built beyond that.
 
 ---
 
