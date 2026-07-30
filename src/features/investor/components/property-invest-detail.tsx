@@ -10,8 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
-import { useInvestorProperty } from "@/features/investor/queries";
-import { useWallet } from "@/features/investor/queries";
+import { useInvestorProperty, useWallet } from "@/features/investor/queries";
 import { useInvest } from "@/features/investor/mutations";
 import { formatNairaFull } from "@/lib/utils";
 
