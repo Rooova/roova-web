@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Building2, Wallet, Bell, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { notify } from "@/lib/toast";
+import { useLogout } from "@/features/auth/mutations";
 
 const NAV_ITEMS = [
   { href: "/agency", label: "Overview", icon: LayoutDashboard },
@@ -17,10 +17,10 @@ const NAV_ITEMS = [
 export function AgencySidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const logout = useLogout("AGENCY");
 
   function handleLogout() {
-    notify.success("Logged out.");
-    router.push("/");
+    logout.mutate(undefined, { onSuccess: () => router.push("/agency/login") });
   }
 
   return (

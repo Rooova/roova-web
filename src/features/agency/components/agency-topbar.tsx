@@ -5,10 +5,12 @@ import { Bell, CheckCheck } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNotifications } from "@/features/agency/queries";
 import { useMarkAllNotificationsRead, useMarkNotificationRead } from "@/features/agency/mutations";
+import { useMe } from "@/features/auth/queries";
 import { cn } from "@/lib/utils";
 
 export function AgencyTopbar() {
   const { data: notifications } = useNotifications();
+  const { data: agency } = useMe("AGENCY");
   const markAllRead = useMarkAllNotificationsRead();
   const markRead = useMarkNotificationRead();
 
@@ -18,7 +20,7 @@ export function AgencyTopbar() {
   return (
     <header className="shadow-ring flex h-16 items-center justify-between bg-card px-6">
       <p className="text-sm font-medium tracking-[-0.01em] text-muted-foreground">
-        Adunni Properties &middot; Gold tier
+        {agency ? `${agency.name} · ${String(agency.tier)}` : ""}
       </p>
 
       <Popover>

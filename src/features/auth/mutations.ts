@@ -66,6 +66,7 @@ export function useLogout(role: AuthRole) {
     mutationFn: () => logout(role),
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: authKeys.me(role) });
+      notify.success("Logged out.");
     },
   });
 }
