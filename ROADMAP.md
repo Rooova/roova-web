@@ -48,11 +48,11 @@ Everything here is net-new backend work; only auth exists today.
 
 ## Phase 3 — Frontend ↔ backend integration
 
-- [ ] **MVP** Replace every simulated `api.ts` in roova-web (`features/agency`, `features/admin`, `features/marketplace`, `features/auth`) with real `fetch` calls to roova-backend, keeping the existing TanStack Query hook signatures so components don't need to change.
-- [ ] **MVP** Real auth gating — the agency and admin dashboards currently have *no* auth check at all (by deliberate earlier scope choice, since there was no backend yet); once real sessions exist, add middleware/layout-level checks that redirect unauthenticated users to login instead of rendering the dashboard directly.
-- [ ] **MVP** Wire the session cookie flow across the real deployed subdomains (`roova.xyz` / `agency.roova.xyz` / `admin.roova.xyz`) — this was designed for and tested locally via `*.localhost`, but cross-subdomain cookies behave differently under real HTTPS/production `Domain=` attributes and need a live-environment pass.
-- [ ] Real loading/error states sized for actual network latency and real failure modes (timeouts, 500s, offline) — today's "loading states" are calibrated to fixed fake delays.
-- [ ] Environment configuration — API base URL per environment (local/staging/prod), secrets never committed (`NEXT_PUBLIC_*` vars already established for the subdomain URLs; extend the pattern for the API URL).
+- [x] **MVP** Replace every simulated `api.ts` in roova-web with real `fetch` calls to roova-backend. *(Note: `features/admin` and `features/marketplace` didn't actually exist yet — both were built from scratch this phase, not migrated. `features/agency`'s Property-backed functions are real; Overview/Earnings/Notifications/Settings stay simulated since no payout or notification model exists on the backend. `features/auth` is fully real — login/signup/reset now actually authenticate, are role-parameterized (`AGENCY`/`ADMIN`/`INVESTOR`), and login redirects role-aware instead of hardcoding `/agency` for everyone.)*
+- [x] **MVP** Real auth gating — every dashboard (`/agency`, `/admin`, `/investor`) now has a Server Component layout-level check (`getServerSession()` forwarding the incoming request's cookie to the backend's `/auth/{role}/me`), redirecting to that role's login on failure. Verified both "no session" and "wrong-role session" redirect correctly.
+- [x] Environment configuration — `NEXT_PUBLIC_API_URL` (frontend) and `PORT`/`FRONTEND_ORIGINS` (backend) added for local dev; verified the real CORS preflight + credentialed cross-port request exchange (not just same-origin curl).
+- [ ] **MVP** Wire the session cookie flow across real deployed subdomains — **descoped**: decided with the user to go single-origin, path-based routing (`/agency/*`, `/admin/*`, `/investor/*` all under one Next.js deploy) instead of rebuilding `agency.roova.xyz`/`admin.roova.xyz` subdomain middleware, since no such middleware actually existed in this checkout to begin with. Subdomain-based multi-tenancy remains a possible future direction, not pursued here.
+- [ ] Real loading/error states sized for actual network latency and real failure modes (timeouts, 500s, offline) — today's "loading states" are calibrated to fixed fake delays for the still-simulated endpoints; real endpoints go through `ApiError`/TanStack Query's built-in pending/error states but haven't been specifically tuned.
 
 ---
 
@@ -60,12 +60,12 @@ Everything here is net-new backend work; only auth exists today.
 
 There is currently no investor-facing dashboard anywhere in the frontend — investors only exist as records inside the agency/admin views. This is the biggest product gap.
 
-- [ ] **MVP** Investor login/signup destination — the main site's auth pages exist and work, but currently redirect to the *agency* dashboard on success for everyone; needs role-aware redirect once real accounts have a role.
-- [ ] **MVP** Portfolio view — shares owned, current value, dividend history.
-- [ ] **MVP** Browse + invest flow — pick a property, choose share count, pay (ties into Phase 2 payments).
-- [ ] KYC upload flow (ties into Phase 1).
-- [ ] Secondary market trading UI — list shares for sale, browse/buy others' listings.
-- [ ] Marketplace purchase tracking — investors who submitted a `PurchaseOffer` (Phase 1) should be able to see its status somewhere, rather than it only being visible to the agency.
+- [x] **MVP** Investor login/signup destination — `/login`/`/signup` are now investor-specific and redirect to `/investor` on success (role-aware, no longer hardcoded to `/agency`).
+- [x] **MVP** Portfolio view (`/investor`) — investments list with property context, status, and total invested, backed by real `GET /investments/mine`.
+- [x] **MVP** Browse + invest flow (`/investor/properties`, `/investor/properties/:id`) — real `GET /properties`, invest form posts to `POST /investments`, with a real wallet (`/investor/wallet`: balance, transaction history, Paystack deposit redirect, and a `/investor/wallet/callback` page that verifies the deposit on return).
+- [x] Marketplace purchase tracking (`/investor/marketplace-offers`) — real `GET /purchase-offers/mine` + withdraw action.
+- [ ] KYC upload flow — still out of scope; no backend upload/review endpoint exists (non-MVP, deferred in Phase 1).
+- [ ] Secondary market trading UI — still out of scope; no backend model exists (non-MVP, deferred in Phase 1).
 
 ---
 
