@@ -14,6 +14,8 @@
   --muted-foreground: #6e6659;
 
   --success: #16a34a;
+  --warning: #b45309;
+  --destructive: #dc2626;
 
   --border: #e3d9c4;
   --card: #ffffff;
@@ -30,6 +32,8 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);

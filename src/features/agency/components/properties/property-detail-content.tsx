@@ -9,21 +9,29 @@ import { ErrorState } from "@/components/shared/error-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { useProperty } from "@/features/agency/queries";
+import { useSubmitProperty } from "@/features/agency/mutations";
 import { formatNairaCompact, formatNairaFull } from "@/lib/utils";
 import type { PropertyStatus } from "@/features/agency/schemas";
 
 const STATUS_BADGE: Record<
   PropertyStatus,
-  { label: string; variant: "success" | "primary" | "outline" }
+  { label: string; variant: "success" | "primary" | "outline" | "warning" | "destructive" }
 > = {
-  live: { label: "Live", variant: "success" },
-  funded: { label: "Funded", variant: "primary" },
-  draft: { label: "Draft", variant: "outline" },
+  LIVE: { label: "Live", variant: "success" },
+  FUNDED: { label: "Funded", variant: "primary" },
+  DRAFT: { label: "Draft", variant: "outline" },
+  PENDING_REVIEW: { label: "Pending review", variant: "warning" },
+  REJECTED: { label: "Rejected", variant: "destructive" },
+  CLOSED_UNFUNDED: { label: "Closed (unfunded)", variant: "outline" },
 };
+
+const SUBMITTABLE_STATUSES: PropertyStatus[] = ["DRAFT", "REJECTED"];
 
 export function PropertyDetailContent({ id }: { id: string }) {
   const { data, isPending, isError, refetch } = useProperty(id);
+  const submitProperty = useSubmitProperty();
 
   if (isPending) {
     return (
@@ -71,8 +79,25 @@ export function PropertyDetailContent({ id }: { id: string }) {
             </h2>
             <p className="mt-0.5 text-sm text-muted-foreground">{property.tier}</p>
           </div>
-          <Badge variant={status.variant}>{status.label}</Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge variant={status.variant}>{status.label}</Badge>
+            {SUBMITTABLE_STATUSES.includes(property.status) && (
+              <Button
+                size="sm"
+                disabled={submitProperty.isPending}
+                onClick={() => submitProperty.mutate(property.id)}
+              >
+                {submitProperty.isPending ? "Submitting…" : "Submit for review"}
+              </Button>
+            )}
+          </div>
         </div>
+
+        {property.status === "REJECTED" && property.rejectionReason && (
+          <div className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <span className="font-medium">Rejected:</span> {property.rejectionReason}
+          </div>
+        )}
 
         <div className="mt-6 grid gap-6 sm:grid-cols-3">
           <div>
