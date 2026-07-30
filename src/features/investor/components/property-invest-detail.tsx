@@ -41,11 +41,14 @@ export function PropertyInvestDetail({ id }: { id: string }) {
     );
   }
 
+  const currentProperty = property;
   const percent =
-    property.target > 0 ? Math.round((property.raised / property.target) * 100) : 0;
+    currentProperty.target > 0
+      ? Math.round((currentProperty.raised / currentProperty.target) * 100)
+      : 0;
   const sharesCount = Number(shares) || 0;
-  const totalAmount = sharesCount * property.sharePrice;
-  const canInvest = property.status === "LIVE";
+  const totalAmount = sharesCount * currentProperty.sharePrice;
+  const canInvest = currentProperty.status === "LIVE";
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -58,7 +61,7 @@ export function PropertyInvestDetail({ id }: { id: string }) {
       return;
     }
     setError(null);
-    invest.mutate({ propertyId: property.id, shares: sharesCount });
+    invest.mutate({ propertyId: currentProperty.id, shares: sharesCount });
   }
 
   return (
