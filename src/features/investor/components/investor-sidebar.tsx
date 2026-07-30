@@ -2,26 +2,24 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Building2, Home, Wallet, Bell, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Building2, Wallet, FileText, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLogout } from "@/features/auth/mutations";
 
 const NAV_ITEMS = [
-  { href: "/agency", label: "Overview", icon: LayoutDashboard },
-  { href: "/agency/properties", label: "Properties", icon: Building2 },
-  { href: "/agency/marketplace", label: "Marketplace", icon: Home },
-  { href: "/agency/earnings", label: "Earnings", icon: Wallet },
-  { href: "/agency/notifications", label: "Notifications", icon: Bell },
-  { href: "/agency/settings", label: "Settings", icon: Settings },
+  { href: "/investor", label: "Portfolio", icon: LayoutDashboard },
+  { href: "/investor/properties", label: "Browse", icon: Building2 },
+  { href: "/investor/wallet", label: "Wallet", icon: Wallet },
+  { href: "/investor/marketplace-offers", label: "My offers", icon: FileText },
 ];
 
-export function AgencySidebar() {
+export function InvestorSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const logout = useLogout("AGENCY");
+  const logout = useLogout("INVESTOR");
 
   function handleLogout() {
-    logout.mutate(undefined, { onSuccess: () => router.push("/agency/login") });
+    logout.mutate(undefined, { onSuccess: () => router.push("/login") });
   }
 
   return (
@@ -33,7 +31,7 @@ export function AgencySidebar() {
       <nav className="mt-8 flex flex-1 flex-col gap-1">
         {NAV_ITEMS.map((item) => {
           const isActive =
-            item.href === "/agency" ? pathname === item.href : pathname.startsWith(item.href);
+            item.href === "/investor" ? pathname === item.href : pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}

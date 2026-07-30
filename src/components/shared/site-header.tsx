@@ -4,6 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 const NAV_LINKS = [
   { href: "#how-it-works", label: "How it works" },
   { href: "#properties", label: "Properties" },
+  { href: "/marketplace", label: "Marketplace" },
   { href: "#diaspora", label: "Diaspora" },
   { href: "#agencies", label: "For agencies" },
 ];
