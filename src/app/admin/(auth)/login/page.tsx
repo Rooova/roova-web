@@ -3,13 +3,13 @@ import { AuthCard } from "@/features/auth/components/auth-card";
 import { LoginForm } from "@/features/auth/components/login-form";
 
 export const metadata: Metadata = {
-  title: "Log in — Roova",
+  title: "Admin log in — Roova",
 };
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   return (
-    <AuthCard title="Log in" subtitle="Welcome back. Enter your details to continue.">
-      <LoginForm role="INVESTOR" />
+    <AuthCard title="Admin log in" subtitle="Roova operations access.">
+      <LoginForm role="ADMIN" />
     </AuthCard>
   );
 }

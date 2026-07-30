@@ -1,28 +1,65 @@
 import { z } from "zod";
 import { simulateNetwork } from "@/lib/simulate";
+import { apiGet, apiPatch, apiPost } from "@/lib/api-client";
 import {
-  overviewStatsSchema,
   agencyPropertySchema,
+  investorRowSchema,
+  overviewStatsSchema,
   fundingPointSchema,
   earningsPointSchema,
   payoutSchema,
-  investorRowSchema,
   notificationSchema,
   agencySettingsSchema,
-  type AgencySettings,
   type AgencyProperty,
   type CreatePropertyInput,
+  type AgencySettings,
 } from "@/features/agency/schemas";
 import {
   overviewStats,
-  properties,
   fundingSeries,
   earningsSeries,
   payouts,
-  investorsByProperty,
   notifications,
   agencyProfile,
 } from "@/features/agency/data";
+
+// --- Property — real backend calls ---
+
+export async function getProperties() {
+  const res = await apiGet<unknown[]>("/properties/mine");
+  return z.array(agencyPropertySchema).parse(res);
+}
+
+export async function getProperty(id: string) {
+  const res = await apiGet<{ property: unknown; investors: unknown[] }>(
+    `/properties/${id}/full`,
+  );
+  return {
+    property: agencyPropertySchema.parse(res.property),
+    investors: z.array(investorRowSchema).parse(res.investors),
+  };
+}
+
+export async function createProperty(input: CreatePropertyInput): Promise<AgencyProperty> {
+  const res = await apiPost("/properties", input);
+  return agencyPropertySchema.parse(res);
+}
+
+export async function updateProperty(
+  id: string,
+  input: Partial<CreatePropertyInput> & { description?: string },
+): Promise<AgencyProperty> {
+  const res = await apiPatch(`/properties/mine/${id}`, input);
+  return agencyPropertySchema.parse(res);
+}
+
+export async function submitProperty(id: string): Promise<AgencyProperty> {
+  const res = await apiPost(`/properties/mine/${id}/submit`);
+  return agencyPropertySchema.parse(res);
+}
+
+// --- Overview / earnings / notifications / settings — still simulated:
+// no payout or notification model exists on the backend yet. ---
 
 export async function getOverview() {
   const res = await simulateNetwork(overviewStats);
@@ -32,26 +69,6 @@ export async function getOverview() {
 export async function getFundingSeries() {
   const res = await simulateNetwork(fundingSeries);
   return z.array(fundingPointSchema).parse(res);
-}
-
-export async function getProperties() {
-  const res = await simulateNetwork(properties);
-  return z.array(agencyPropertySchema).parse(res);
-}
-
-export async function getProperty(id: string) {
-  const property = properties.find((p) => p.id === id);
-  if (!property) return null;
-
-  const res = await simulateNetwork({
-    property,
-    investors: investorsByProperty[id] ?? [],
-  });
-
-  return {
-    property: agencyPropertySchema.parse(res.property),
-    investors: z.array(investorRowSchema).parse(res.investors),
-  };
 }
 
 export async function getEarnings() {
@@ -78,44 +95,6 @@ export async function markAllNotificationsRead() {
     n.read = true;
   });
   return simulateNetwork({ ok: true as const }, 250);
-}
-
-function slugify(title: string) {
-  const base = title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-  let id = base;
-  let suffix = 2;
-  while (properties.some((p) => p.id === id)) {
-    id = `${base}-${suffix}`;
-    suffix += 1;
-  }
-  return id;
-}
-
-export async function createProperty(input: CreatePropertyInput): Promise<AgencyProperty> {
-  const property: AgencyProperty = {
-    id: slugify(input.title),
-    location: input.location,
-    title: input.title,
-    tier: input.tier,
-    status: "draft",
-    yieldPct: input.yieldPct,
-    raised: 0,
-    target: input.target,
-    investors: 0,
-    daysRemaining: input.daysRemaining,
-    sharePrice: input.sharePrice,
-    createdAt: new Date().toISOString().slice(0, 10),
-  };
-
-  properties.unshift(property);
-
-  const res = await simulateNetwork(property);
-  return agencyPropertySchema.parse(res);
 }
 
 export async function getAgencySettings() {

@@ -1,10 +1,18 @@
 import { z } from "zod";
 
-export const propertyStatusSchema = z.enum(["draft", "live", "funded"]);
+export const propertyStatusSchema = z.enum([
+  "DRAFT",
+  "PENDING_REVIEW",
+  "LIVE",
+  "REJECTED",
+  "FUNDED",
+  "CLOSED_UNFUNDED",
+]);
 export type PropertyStatus = z.infer<typeof propertyStatusSchema>;
 
 export const agencyPropertySchema = z.object({
   id: z.string(),
+  agencyId: z.string(),
   location: z.string(),
   title: z.string(),
   tier: z.string(),
@@ -15,7 +23,14 @@ export const agencyPropertySchema = z.object({
   investors: z.number(),
   daysRemaining: z.number(),
   sharePrice: z.number(),
+  sharesSold: z.number(),
+  totalShares: z.number().nullable(),
+  description: z.string().nullable(),
+  images: z.array(z.string()),
+  rejectionReason: z.string().nullable(),
+  reviewedAt: z.string().nullable(),
   createdAt: z.string(),
+  updatedAt: z.string(),
 });
 export type AgencyProperty = z.infer<typeof agencyPropertySchema>;
 

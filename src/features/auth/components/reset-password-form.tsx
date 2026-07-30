@@ -8,10 +8,13 @@ import { FormField } from "@/components/ui/form-field";
 import { firstFieldErrors } from "@/lib/utils";
 import { useResetPassword } from "@/features/auth/mutations";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/features/auth/schemas";
+import type { SelfServeRole } from "@/features/auth/api";
+import { roleAuthPaths } from "@/features/auth/role-paths";
 
-export function ResetPasswordForm({ token }: { token: string }) {
+export function ResetPasswordForm({ role, token }: { role: SelfServeRole; token: string }) {
   const router = useRouter();
-  const resetPassword = useResetPassword();
+  const resetPassword = useResetPassword(role);
+  const paths = roleAuthPaths(role);
   const [values, setValues] = useState({ password: "", confirmPassword: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof ResetPasswordInput, string>>>({});
 
@@ -23,7 +26,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       return;
     }
     setErrors({});
-    resetPassword.mutate(result.data, { onSuccess: () => router.push("/login") });
+    resetPassword.mutate(result.data, { onSuccess: () => router.push(paths.login) });
   }
 
   return (

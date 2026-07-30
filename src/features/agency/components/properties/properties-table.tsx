@@ -15,18 +15,24 @@ import type { PropertyStatus } from "@/features/agency/schemas";
 
 const FILTERS: { value: "all" | PropertyStatus; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "live", label: "Live" },
-  { value: "funded", label: "Funded" },
-  { value: "draft", label: "Draft" },
+  { value: "LIVE", label: "Live" },
+  { value: "FUNDED", label: "Funded" },
+  { value: "PENDING_REVIEW", label: "Pending" },
+  { value: "DRAFT", label: "Draft" },
+  { value: "REJECTED", label: "Rejected" },
+  { value: "CLOSED_UNFUNDED", label: "Closed" },
 ];
 
 const STATUS_BADGE: Record<
   PropertyStatus,
-  { label: string; variant: "success" | "primary" | "outline" }
+  { label: string; variant: "success" | "primary" | "outline" | "warning" | "destructive" }
 > = {
-  live: { label: "Live", variant: "success" },
-  funded: { label: "Funded", variant: "primary" },
-  draft: { label: "Draft", variant: "outline" },
+  LIVE: { label: "Live", variant: "success" },
+  FUNDED: { label: "Funded", variant: "primary" },
+  DRAFT: { label: "Draft", variant: "outline" },
+  PENDING_REVIEW: { label: "Pending review", variant: "warning" },
+  REJECTED: { label: "Rejected", variant: "destructive" },
+  CLOSED_UNFUNDED: { label: "Closed (unfunded)", variant: "outline" },
 };
 
 export function PropertiesTable() {

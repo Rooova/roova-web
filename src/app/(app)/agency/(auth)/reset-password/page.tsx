@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Reset password — Roova",
 };
 
-export default async function ResetPasswordPage({
+export default async function AgencyResetPasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{ token?: string }>;
@@ -19,12 +19,12 @@ export default async function ResetPasswordPage({
       title="Set a new password"
       subtitle="Choose a new password for your account."
       footer={
-        <Link href="/login" className="font-medium text-primary hover:text-primary/80">
+        <Link href="/agency/login" className="font-medium text-primary hover:text-primary/80">
           Back to log in
         </Link>
       }
     >
-      <ResetPasswordForm role="INVESTOR" token={token ?? ""} />
+      <ResetPasswordForm role="AGENCY" token={token ?? ""} />
     </AuthCard>
   );
 }

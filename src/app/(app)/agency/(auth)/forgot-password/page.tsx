@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   title: "Forgot password — Roova",
 };
 
-export default function ForgotPasswordPage() {
+export default function AgencyForgotPasswordPage() {
   return (
     <AuthCard
       title="Forgot your password?"
       subtitle="Enter your email and we'll send you a reset link."
     >
-      <ForgotPasswordForm role="INVESTOR" />
+      <ForgotPasswordForm role="AGENCY" />
     </AuthCard>
   );
 }

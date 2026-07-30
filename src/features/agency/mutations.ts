@@ -4,9 +4,11 @@ import {
   markAllNotificationsRead,
   updateAgencySettings,
   createProperty,
+  submitProperty,
 } from "@/features/agency/api";
 import { agencyKeys } from "@/features/agency/queries";
 import { notify } from "@/lib/toast";
+import { getErrorMessage } from "@/lib/api-client";
 import type { Notification } from "@/features/agency/schemas";
 
 export function useMarkNotificationRead() {
@@ -67,9 +69,24 @@ export function useCreateProperty() {
     mutationFn: createProperty,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agencyKeys.properties() });
-      queryClient.invalidateQueries({ queryKey: agencyKeys.overview() });
       notify.success("Listing created — it's saved as a draft.");
     },
-    onError: () => notify.error("Couldn't create the listing. Please try again."),
+    onError: (error) =>
+      notify.error(getErrorMessage(error, "Couldn't create the listing. Please try again.")),
+  });
+}
+
+export function useSubmitProperty() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: submitProperty,
+    onSuccess: (property) => {
+      queryClient.invalidateQueries({ queryKey: agencyKeys.properties() });
+      queryClient.invalidateQueries({ queryKey: agencyKeys.property(property.id) });
+      notify.success("Submitted for review.");
+    },
+    onError: (error) =>
+      notify.error(getErrorMessage(error, "Couldn't submit this listing. Please try again.")),
   });
 }
